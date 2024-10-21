@@ -193,7 +193,7 @@ class FCM
   def for_uri(uri, extra_headers = {})
     connection = ::Faraday.new(
       url: uri,
-      request: { timeout: @http_options.fetch(:timeout, DEFAULT_TIMEOUT) },
+      request: { timeout: @http_options.fetch(:timeout, DEFAULT_TIMEOUT) }
     ) do |faraday|
       faraday.adapter Faraday.default_adapter
       faraday.headers["Content-Type"] = "application/json"
