@@ -227,7 +227,8 @@ class FCM
     connection = ::Faraday.new(:url => uri) do |faraday|
       faraday.adapter Faraday.default_adapter
       faraday.headers["Content-Type"] = "application/json"
-      faraday.headers["Authorization"] = "key=#{api_key}"
+      faraday.headers["Authorization"] = "Bearer #{jwt_token}"
+      faraday.headers["access_token_auth"]= "true"
       extra_headers.each do |key, value|
         faraday.headers[key] = value
       end
@@ -319,11 +320,19 @@ class FCM
 
   def jwt_token
     scope = "https://www.googleapis.com/auth/firebase.messaging"
-    authorizer = Google::Auth::ServiceAccountCredentials.make_creds(
-      json_key_io: File.open(@json_key_path),
+    @authorizer ||= Google::Auth::ServiceAccountCredentials.make_creds(
+      json_key_io: json_key,
       scope: scope,
     )
-    token = authorizer.fetch_access_token!
+    token = @authorizer.fetch_access_token!
     token["access_token"]
+  end
+
+  def json_key
+    @json_key ||= if @json_key_path.respond_to?(:read)
+                    @json_key_path
+                  else
+                    File.open(@json_key_path)
+                  end
   end
 end
